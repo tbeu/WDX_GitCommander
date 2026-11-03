@@ -93,7 +93,7 @@ static const int fieldtypes[fieldcount] = {
     ft_string,
     ft_string,
     ft_string,
-    ft_string
+    ft_stringw
 };
 
 const char *fieldunits_and_multiplechoicestrings[fieldcount] = {
@@ -271,9 +271,13 @@ static struct tm FILETIME_to_tm(const FILETIME *lpFileTime)
 
 static char *ePrintTime(char *pTrgt, FILETIME *pIn, int maxSize)
 {
-    struct tm xTm = FILETIME_to_tm(pIn);
+    // pIn is UTC; FILETIME_to_tm() would format UTC, so convert to local time first
+    FILETIME xLocal;
+    if (!FileTimeToLocalFileTime(pIn, &xLocal))
+        xLocal = *pIn;
+    struct tm xTm = FILETIME_to_tm(&xLocal);
     char msg[512];
-    strftime(msg, maxSize, "%d.%m.%Y %H:%I ", &xTm);
+    strftime(msg, maxSize, "%d.%m.%Y %H:%M ", &xTm);
     return strlcat(pTrgt, msg, maxSize);
 }
 /*char* PrintTime(char *pTarget,double pAgo,unsigned int pMaxLen)
@@ -473,6 +477,90 @@ static git_repository *CheckRepo(WIN32_FIND_DATAW fd, const wchar_t *FileName, E
 }
 // git end
 
+// libgit2 1.1.0 provided git_commit_entry_last_commit_id(), which is not available in 1.9.x.
+// Replacement built on the public API: returns the commit that introduced the blob currently stored
+// at 'path' in 'commit', i.e. walks back through parents while the blob at 'path' is unchanged.
+// Returns GIT_ENOTFOUND when 'path' does not exist in 'commit'.
+
+// 1 = parent has the same blob at path, 0 = not (or path missing), < 0 = error
+static int blob_same_in_commit(git_repository *repo, const git_oid *commitId, const git_oid &target, const char *path)
+{
+    git_commit *c = nullptr;
+    int rc = git_commit_lookup(&c, repo, commitId);
+    if (rc < 0)
+        return rc;
+    git_tree *t = nullptr;
+    rc = git_commit_tree(&t, c);
+    git_commit_free(c);
+    if (rc < 0)
+        return rc;
+    git_tree_entry *e = nullptr;
+    rc = git_tree_entry_bypath(&e, t, path);
+    git_tree_free(t);
+    if (rc == GIT_ENOTFOUND)
+        return 0;
+    if (rc < 0)
+        return rc;
+    const int same = git_oid_equal(git_tree_entry_id(e), &target) ? 1 : 0;
+    git_tree_entry_free(e);
+    return same;
+}
+
+static int last_commit_for_path(git_oid *out, git_repository *repo, const git_commit *commit, const char *path)
+{
+    git_tree *tree = nullptr;
+    int rc = git_commit_tree(&tree, commit);
+    if (rc < 0)
+        return rc;
+    git_tree_entry *entry = nullptr;
+    rc = git_tree_entry_bypath(&entry, tree, path);
+    git_tree_free(tree);
+    if (rc < 0)
+        return GIT_ENOTFOUND;
+    const git_oid target = *git_tree_entry_id(entry);
+    git_tree_entry_free(entry);
+
+    std::vector<git_oid> frontier{*git_commit_id(commit)};
+    while (true) {
+        std::vector<git_oid> next;
+        bool anyParentSame = false;
+        for (const git_oid &id : frontier) {
+            git_commit *c = nullptr;
+            rc = git_commit_lookup(&c, repo, &id);
+            if (rc < 0)
+                return rc;
+            std::vector<git_oid> parentIds;
+            const unsigned int parents = git_commit_parentcount(c);
+            for (unsigned int i = 0; i < parents; i++)
+                parentIds.push_back(*git_commit_parent_id(c, i));
+            git_commit_free(c);
+
+            for (const git_oid &pid : parentIds) {
+                const int same = blob_same_in_commit(repo, &pid, target, path);
+                if (same < 0)
+                    return same;
+                if (same) {
+                    anyParentSame = true;
+                    bool seen = false;
+                    for (const git_oid &n : next) {
+                        if (git_oid_equal(&n, &pid)) {
+                            seen = true;
+                            break;
+                        }
+                    }
+                    if (!seen)
+                        next.push_back(pid);
+                }
+            }
+        }
+        if (!anyParentSame) {
+            *out = frontier.front();
+            return 0;
+        }
+        frontier.swap(next);
+    }
+}
+
 int __stdcall ContentGetValue(const char *FileName, int FieldIndex, int UnitIndex, void *FieldValue, int maxSize,
                               int flags)
 {
@@ -665,7 +753,7 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                         if (rc == 0 && xNeedLastAffCommit) {
                             // we have the last commit. Now to walk it:
                             if ((xBufFN[0] != '\0') &&
-                                0 == git_commit_entry_last_commit_id(&xLastAffecting, repo, commit, xBufFN)) {
+                                0 == last_commit_for_path(&xLastAffecting, repo, commit, xBufFN)) {
                                 rc = git_commit_lookup(&xFilesCommit, repo, &xLastAffecting);
                             }
                         }
@@ -675,7 +763,7 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                 {
                     xDidError = true;
                     if (fieldtypes[FieldIndex] == ft_string) {
-                        const git_error *error = giterr_last();
+                        const git_error *error = git_error_last();
                         if (error)
                             strlcpy(pFieldStr, error->message, maxSize);
                         else
@@ -754,7 +842,7 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                             {
                                 // strlcpy((char*)FieldValue,xBufFN,maxSize);
                                 // strlcpy((char*)FieldValue,git_repository_path(repo),maxSize);//debug del.
-                                // const git_error *error = giterr_last();
+                                // const git_error *error = git_error_last();
                                 // if (error)
                                 //  strlcpy(xTrgt,error->message,maxSize);
                                 // else
@@ -974,7 +1062,7 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                             if (rc == 0) {
                                 // we have the last commit. Now to walk it:
                                 if ((xBufFN[0] != '\0') &&
-                                    0 == git_commit_entry_last_commit_id(&xLastAffecting, repo, commit, xBufFN)) {
+                                    0 == last_commit_for_path(&xLastAffecting, repo, commit, xBufFN)) {
                                     rc = git_commit_lookup(&xFilesCommit, repo, &xLastAffecting);
                                 }
                             }
@@ -982,9 +1070,9 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
 
                         if (rc != 0)  // error in getting what we wanted
                         {
-                            if (fieldtypes[FieldIndex] == ft_string)  // should be
+                            if (fieldtypes[FieldIndex] == ft_string || fieldtypes[FieldIndex] == ft_stringw)  // should be
                             {
-                                const git_error *error = giterr_last();
+                                const git_error *error = git_error_last();
                                 if (error) {
                                     strlcat(pFieldStr, error->message, maxSize);
                                     strlcat(pFieldStr, "\n", maxSize);
@@ -1060,7 +1148,7 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                             }
                             if (xStatF == 0)  // nothing printed or error
                             {
-                                /*const git_error *error = giterr_last();
+                                /*const git_error *error = git_error_last();
                                 if (error)
                                   strlcpy(xTrgt,error->message,maxSize);
                                 else*/
@@ -1077,6 +1165,13 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                             git_commit_free(commit);
                         git_reference_free(head);
                         xGitPrinted = true;
+
+                        // ft_stringw: pFieldStr holds UTF-8, convert into the wide FieldValue buffer
+                        wchar_t *wBuf = cp2u(CP_UTF8, pFieldStr);
+                        if (wBuf) {
+                            wcslcpy(static_cast<wchar_t *>(FieldValue), wBuf, maxSize / 2);
+                            delete[] wBuf;
+                        }
                     }
                     if (!xGitPrinted)
                         return ft_fieldempty;

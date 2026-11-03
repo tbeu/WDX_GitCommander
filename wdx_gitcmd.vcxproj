@@ -86,24 +86,26 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)libgit2-1.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)libgit2-1.9.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>gitcmd.def</ModuleDefinitionFile>
-      <AdditionalDependencies>crypt32.lib;Rpcrt4.lib;Winhttp.lib;$(ProjectDir)libgit2-1.1.0\build\win32\$(Configuration)\git2.lib;$(ProjectDir)libgit2-1.1.0\build\win32\deps\zlib\zlib.dir\$(Configuration)\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;Rpcrt4.lib;Winhttp.lib;$(ProjectDir)libgit2-1.9.7\build\win32\$(Configuration)\git2.lib;$(ProjectDir)libgit2-1.9.7\build\win32\deps\zlib\zlib.dir\$(Configuration)\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)libgit2-1.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)libgit2-1.9.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>gitcmd.def</ModuleDefinitionFile>
-      <AdditionalDependencies>crypt32.lib;Rpcrt4.lib;Winhttp.lib;$(ProjectDir)libgit2-1.1.0\build\win64\$(Configuration)\git2.lib;$(ProjectDir)libgit2-1.1.0\build\win64\deps\zlib\zlib.dir\$(Configuration)\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;Rpcrt4.lib;Winhttp.lib;$(ProjectDir)libgit2-1.9.7\build\win64\$(Configuration)\git2.lib;$(ProjectDir)libgit2-1.9.7\build\win64\deps\zlib\zlib.dir\$(Configuration)\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -112,7 +114,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)libgit2-1.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libgit2-1.9.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -123,7 +125,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>gitcmd.def</ModuleDefinitionFile>
-      <AdditionalDependencies>crypt32.lib;Rpcrt4.lib;Winhttp.lib;$(ProjectDir)libgit2-1.1.0\build\win32\$(Configuration)\git2.lib;$(ProjectDir)libgit2-1.1.0\build\win32\deps\zlib\zlib.dir\$(Configuration)\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;Rpcrt4.lib;Winhttp.lib;$(ProjectDir)libgit2-1.9.7\build\win32\$(Configuration)\git2.lib;$(ProjectDir)libgit2-1.9.7\build\win32\deps\zlib\zlib.dir\$(Configuration)\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -133,7 +135,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)libgit2-1.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libgit2-1.9.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
@@ -143,7 +145,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>gitcmd.def</ModuleDefinitionFile>
-      <AdditionalDependencies>crypt32.lib;Rpcrt4.lib;Winhttp.lib;$(ProjectDir)libgit2-1.1.0\build\win64\$(Configuration)\git2.lib;$(ProjectDir)libgit2-1.1.0\build\win64\deps\zlib\zlib.dir\$(Configuration)\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;Rpcrt4.lib;Winhttp.lib;$(ProjectDir)libgit2-1.9.7\build\win64\$(Configuration)\git2.lib;$(ProjectDir)libgit2-1.9.7\build\win64\deps\zlib\zlib.dir\$(Configuration)\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>

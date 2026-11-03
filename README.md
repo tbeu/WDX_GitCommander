@@ -1,4 +1,5 @@
 # WDX_GitCommander
+
 Git plugin for Total Commander!
 (WDX, that means column information and mouseover hints over a repository or a file in repository.)
 
@@ -37,3 +38,29 @@ In the future I would like to make it with better installators and so. If you lo
 Martin.
 
 PS: Thread on the Total Commander site: http://www.ghisler.ch/board/viewtopic.php?t=42074
+
+## Changelog
+
+### 2.0.2.0
+
+- Updated libgit2 from v1.1.0 to v1.9.7
+- Updated zlib to v1.3.2
+- Changed field FullDescription to ft_stringw
+- Fixed FullDescription commit date
+
+### 2.0.1.0
+    
+- Fixed bug not obtaining the commit information
+
+### 2.0.0.0
+
+- Switched to Visual Studio 2017
+- Also built 64-bit
+- Enabled Unicode support for commit message and commit author
+- Linked with libgit2 v1.1.0
+- Added field DirBranch to display branch only for directories
+- Implemented repository caching for current file
+- Added .clang-format
+- Moved git2 initialization/termination from DllMain to ContentSetDefaultParams/ContentPluginUnloading
+- Removed compiler warnings
+- Removed warnings reported by cppcheck
