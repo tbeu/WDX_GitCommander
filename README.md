@@ -41,6 +41,10 @@ PS: Thread on the Total Commander site: http://www.ghisler.ch/board/viewtopic.ph
 
 ## Changelog
 
+### 2.0.3.0
+
+- Updated zlib from v1.3.2 to v1.4
+
 ### 2.0.2.0
 
 - Updated libgit2 from v1.1.0 to v1.9.7
@@ -49,7 +53,7 @@ PS: Thread on the Total Commander site: http://www.ghisler.ch/board/viewtopic.ph
 - Fixed FullDescription commit date
 
 ### 2.0.1.0
-    
+
 - Fixed bug not obtaining the commit information
 
 ### 2.0.0.0
